@@ -1,104 +1,127 @@
-💉 Pen® 3D Interactive Showcase (Unity Experience)
+# 💉 Pen® 3D Interactive Showcase  
+### 🚀 Unity-Based Immersive Training Experience
 
-An immersive, real-time 3D training and product exploration experience built in Unity.
-Designed for Healthcare Professionals (HCPs) and patient education, this project combines interactive anatomy, guided workflows, and cinematic UI systems.
+An advanced **real-time 3D interactive simulation** built in Unity, designed to transform how Healthcare Professionals (HCPs) and patients understand insulin delivery systems.
 
-🚀 Overview
+This project blends **product visualization, guided workflows, and intuitive UX** into a cinematic, interactive experience.
 
-Pen® Reimagined in 3D
+---
 
-This project delivers a fully interactive insulin pen training simulation, allowing users to:
+## 🌟 Experience Highlights
 
-Explore product anatomy
-Understand injection workflows
-Learn through guided, interactive steps
+- 🎮 Fully interactive 3D product exploration  
+- 🧠 Guided learning workflow (< 8 min training)  
+- 💡 Clickable anatomy with smart highlighting  
+- 🔄 State-driven injection simulation  
+- 🎯 Designed for engagement, retention, and clarity  
 
-Built using Unity with real-time rendering, animation systems, and modular architecture.
+---
 
-🎯 Key Highlights
-🎮 Real-time 3D interaction
-🧠 Guided learning experience (< 8 minutes training)
-💡 Click-to-explore product anatomy
-🔄 State-driven injection workflow system
-📱 Designed for intuitive UX & engagement
-🧩 Core Features
-🔍 1. Clickable Part Anatomy
-Each component is interactable using raycasting
-Priority-based selection system
-Emission pulse highlighting for user guidance
+## 🎥 Demo
 
-Scripts:
+> 🔗 Add your demo video below
 
-ClickablePart.cs
-ClickManager.cs
-🎠 2. 7-Panel Carousel Menu
-Swipe + keyboard navigation
-Dynamic panel transitions with blur/clear effects
-Async animation sequencing
 
-Scripts:
+---
 
-CarouselMenu.cs
-DOTween animations
-💉 3. Guided Injection Workflow
+## 🧩 Core Features
 
-Step-by-step interactive training:
+### 🔍 Interactive Product Anatomy
+- Clickable 3D components using raycasting
+- Priority-based interaction system
+- Dynamic emission pulse highlights for guidance
 
-Prepare Pen
-Check Insulin Flow
-Select Dose
-Inject
-After Injection
-State machine driven
-Fully animated transitions
-Progress tracking system
+**Scripts:**  
+`ClickablePart.cs` · `ClickManager.cs`
 
-Scripts:
+---
 
-PenManager.cs
-✨ 4. Universal Pulse Highlight System
-Works across:
-MeshRenderer
-UI Image
-SpriteRenderer
-Smooth emission animation using DOTween
+### 🎠 3D Carousel Navigation System
+- Swipe + keyboard navigation
+- Smooth panel transitions with blur/clarity effects
+- Async animation handling
 
-Scripts:
+**Scripts:**  
+`CarouselMenu.cs` · `DOTween`
 
-UniversalPulse.cs
-🏷️ 5. Smart Labels Toggle
-Context-aware label visibility
-Different UI states based on pen interaction
-Staggered animation effects
+---
 
-Scripts:
+### 💉 Guided Injection Workflow (5-Phase System)
 
-LabelsToggle.cs
-📊 6. Expandable Sidebar Panel
-Smooth UI panel expansion
-Camera repositioning + model adjustment
-Sequenced animation system
+1. Prepare Pen  
+2. Check Flow  
+3. Select Dose  
+4. Inject  
+5. After Injection  
 
-Scripts:
+- Fully state-driven architecture  
+- Interactive + animated transitions  
+- Step tracking & progression  
 
-PanelToggleController.cs
-🛠️ Tech Stack
-Tool	Purpose
-🎮 Unity	Real-time 3D rendering & interaction
-🔷 C#	Core logic, workflows, systems
-🎨 Blender	3D modeling & optimization
-🖌️ Substance Painter	PBR texturing
-🖼️ Photoshop	UI/UX assets
-⚡ DOTween	Animation engine
-🧠 Architecture
+**Scripts:**  
+`PenManager.cs`
 
-This project follows a modular, scalable Unity architecture:
+---
 
-🔄 State Machines for workflows
-🎯 Priority-based interaction system
-🎞️ DOTween-driven animation sequencing
-🧩 Component-based design (plug & play systems)
-📂 Key Scripts
+### ✨ Universal Highlight System
+- Works across:
+  - MeshRenderer  
+  - UI Images  
+  - SpriteRenderers  
+- Smooth pulsing emission animation  
+
+**Scripts:**  
+`UniversalPulse.cs`
+
+---
+
+### 🏷️ Smart Label System
+- Context-aware label visibility  
+- Dynamic UI based on interaction state  
+- Staggered animation reveals  
+
+**Scripts:**  
+`LabelsToggle.cs`
+
+---
+
+### 📊 Cinematic UI Panel System
+- Expandable sidebar panel  
+- Camera + model repositioning  
+- Sequenced UI animations  
+
+**Scripts:**  
+`PanelToggleController.cs`
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Tools |
+|--------|------|
+| 🎮 Engine | Unity |
+| 💻 Language | C# |
+| 🎨 3D Modeling | Blender |
+| 🖌️ Texturing | Substance Painter |
+| 🧩 UI/UX | Photoshop |
+| ⚡ Animation | DOTween |
+
+---
+
+## 🧠 System Architecture
+
+Designed with **scalability and performance** in mind:
+
+- 🔄 State Machine-driven workflows  
+- 🎯 Priority-based interaction manager  
+- 🧩 Modular component system  
+- 🎞️ Animation sequencing via DOTween  
+- 📦 Clean separation of UI, logic, and interaction  
+
+---
+
+## 📂 Project Structure
+
 Scripts/
 │
 ├── Interaction/
@@ -117,46 +140,75 @@ Scripts/
 └── Misc/
     ├── FileSizeLogger.cs
     ├── PenController.cs
-📊 Product Insights
-✅ 85% Patient Confidence
-⏱️ < 8 minutes average training time
-💉 Up to 80 units dosing
-🌱 8kg plastic saved per year (10 patients)
-🌍 Environmental Impact
 
-Switching to reusable pen systems significantly reduces waste:
 
-♻️ 8kg plastic saved/year (per 10 patients)
-🧴 Equivalent to ~380 plastic bottles
-🎯 Target: 30% reduction per patient by 2033
-🎥 Demo
+---
 
-👉 Add your demo video here:
+## 📊 Product Insights
 
-https://www.youtube.com/watch?v=YOUR_VIDEO
-🧑‍💻 Author
+- ✅ 85% Patient Confidence  
+- ⏱️ < 8 Minutes Training Time  
+- 💉 Up to 80 Units Dose  
+- ♻️ 8kg Plastic Saved / Year  
 
-Sai Deepak
-Senior Designer & VR Developer
+---
 
-Unity | VR | Interactive Systems
-Real-time 3D Experiences
-UX-driven product simulations
-📌 Future Enhancements
-🔗 Smart pen connectivity simulation
-📊 Analytics tracking (user learning flow)
-🌐 WebGL deployment
-🤖 AI-guided assistant integration
-📱 Mobile optimization
-⚠️ Disclaimer
+## 🌍 Environmental Impact
 
-This project is intended for training and demonstration purposes only.
-All product-related claims are backed by referenced clinical studies.
+- ♻️ Significant reduction in plastic waste  
+- 🧴 ~380 plastic bottles saved annually (per 10 patients)  
+- 🎯 Sustainable reusable pen ecosystem  
 
-⭐ Support
+---
+
+## 🚀 Why This Project Stands Out
+
+✔ Real-world healthcare application  
+✔ Advanced Unity interaction systems  
+✔ Clean scalable architecture  
+✔ High-end UI/UX experience  
+✔ Production-ready code structure  
+
+---
+
+## 🧑‍💻 Author
+
+**Sai Deepak**  
+Senior Designer & VR Developer  
+
+- Unity | VR | Interactive Systems  
+- Real-time 3D Experiences  
+- Product Simulation & UX Engineering  
+
+---
+
+## 🔮 Future Enhancements
+
+- 🤖 AI-assisted guidance system  
+- 📊 Analytics tracking (learning behavior)  
+- 🌐 WebGL deployment  
+- 📱 Mobile optimization  
+- 🔗 Smart device connectivity simulation  
+
+---
+
+## ⚠️ Disclaimer
+
+This project is intended for **training and demonstration purposes only**.  
+All product-related claims are based on referenced clinical studies.
+
+---
+
+## ⭐ Support
 
 If you found this project useful:
 
-⭐ Star the repo
-🍴 Fork it
-🤝 Contribute
+- ⭐ Star the repository  
+- 🍴 Fork the project  
+- 🤝 Contribute or collaborate  
+
+---
+
+## 🔥 Let's Connect
+
+If you're working on **Unity, VR, or interactive simulations**, feel free to connect and collaborate.
