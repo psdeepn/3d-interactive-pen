@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pen® — 3D Interactive Experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nn-navy: #0A1628;
+    --nn-blue: #003087;
+    --nn-blue-mid: #1A4A9C;
+    --nn-blue-light: #4A7FD4;
+    --nn-cyan: #00B4D8;
+    --nn-cyan-glow: rgba(0, 180, 216, 0.15);
+    --nn-white: #F0F4FF;
+    --nn-gray: #8892A4;
+    --nn-card: rgba(255,255,255,0.04);
+    --nn-border: rgba(255,255,255,0.08);
+    --nn-border-bright: rgba(0, 180, 216, 0.3);
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--nn-navy);
+    color: var(--nn-white);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  #cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--nn-cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: screen;
+  }
+  #cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(0,180,216,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.15s ease, width 0.2s, height 0.2s, opacity 0.2s;
+  }
+  body:hover #cursor { transform: scale(1); }
+
+  /* Starfield background */
+  #stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  /* ===================== NAVIGATION ===================== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(10, 22, 40, 0.7);
+    backdrop-filter: blur(20px);
+    border-bottom: 0.5px solid var(--nn-border);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--nn-white);
+    text-decoration: none;
+  }
+
+  .nav-logo-mark {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--nn-blue), var(--nn-cyan));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    color: white;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nn-gray);
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: none;
+  }
+  .nav-links a:hover { color: var(--nn-cyan); }
+
+  .nav-cta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: transparent;
+    border: 0.5px solid var(--nn-border-bright);
+    border-radius: 100px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--nn-cyan);
+    text-decoration: none;
+    cursor: none;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .nav-cta:hover {
+    background: var(--nn-cyan-glow);
+    transform: translateY(-1px);
+  }
+
+  /* ===================== SECTIONS ===================== */
+  section {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===================== HERO ===================== */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-ambient {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px; height: 600px;
+    background: radial-gradient(ellipse, rgba(0,48,135,0.4) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-ambient-2 {
+    position: absolute;
+    top: 20%; left: 60%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,180,216,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--nn-cyan);
+    margin-bottom: 28px;
+    padding: 6px 16px;
+    border: 0.5px solid var(--nn-border-bright);
+    border-radius: 100px;
+    background: rgba(0,180,216,0.06);
+    opacity: 0;
+    animation: fade-up 0.8s 0.2s forwards;
+  }
+
+  .eyebrow-dot {
+    width: 5px; height: 5px;
+    background: var(--nn-cyan);
+    border-radius: 50%;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fade-up 0.8s 0.4s forwards;
+  }
+
+  .hero-title-line {
+    display: block;
+  }
+
+  .hero-title-blue {
+    color: transparent;
+    background: linear-gradient(135deg, #4A7FD4 0%, #00B4D8 50%, #4A7FD4 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--nn-gray);
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto 52px;
+    opacity: 0;
+    animation: fade-up 0.8s 0.6s forwards;
+  }
+
+  .hero-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fade-up 0.8s 0.8s forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--nn-blue), var(--nn-blue-light));
+    border: none;
+    border-radius: 100px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    color: white;
+    text-decoration: none;
+    cursor: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(0,48,135,0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(26,74,156,0.5);
+  }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: transparent;
+    border: 0.5px solid var(--nn-border-bright);
+    border-radius: 100px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--nn-cyan);
+    text-decoration: none;
+    cursor: none;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-outline:hover {
+    background: var(--nn-cyan-glow);
+    transform: translateY(-2px);
+  }
+
+  /* Floating 3D pen preview */
+  .hero-visual {
+    margin-top: 72px;
+    opacity: 0;
+    animation: fade-up 1s 1s forwards;
+    position: relative;
+  }
+
+  .pen-canvas {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ===================== PEN 3D SVG ===================== */
+  .pen-3d-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .pen-float {
+    animation: float 6s ease-in-out infinite;
+    filter: drop-shadow(0 20px 60px rgba(0,180,216,0.2));
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-16px) rotate(2deg); }
+  }
+
+  .pen-label-line {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--nn-cyan);
+    opacity: 0;
+    animation: fade-in 0.5s forwards;
+  }
+
+  .pen-label-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--nn-cyan);
+    flex-shrink: 0;
+    box-shadow: 0 0 8px var(--nn-cyan);
+  }
+
+  .pen-label-line::before {
+    content: '';
+    display: block;
+    height: 0.5px;
+    background: var(--nn-border-bright);
+  }
+
+  /* Scrolling stats ticker */
+  .stats-ticker {
+    margin-top: 80px;
+    border-top: 0.5px solid var(--nn-border);
+    border-bottom: 0.5px solid var(--nn-border);
+    padding: 20px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ticker-track {
+    display: flex;
+    gap: 64px;
+    animation: ticker 20s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--nn-gray);
+  }
+
+  .ticker-item span.val {
+    color: var(--nn-cyan);
+    font-size: 15px;
+  }
+
+  .ticker-sep {
+    width: 4px; height: 4px;
+    background: var(--nn-border-bright);
+    border-radius: 50%;
+  }
+
+  /* ===================== DEMO VIDEO SECTION ===================== */
+  #demo {
+    padding: 120px 48px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 72px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--nn-cyan);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 700px;
+    margin: 0 auto 20px;
+  }
+
+  .section-sub {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--nn-gray);
+    line-height: 1.7;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* YouTube embed */
+  .video-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .video-frame {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 0.5px solid var(--nn-border);
+    background: #000;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 0.5px var(--nn-border-bright) inset;
+    aspect-ratio: 16/9;
+  }
+
+  .video-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  .video-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: linear-gradient(135deg, rgba(0,48,135,0.3), rgba(0,10,28,0.8));
+    cursor: none;
+    transition: background 0.3s;
+  }
+
+  .video-placeholder:hover { background: linear-gradient(135deg, rgba(0,48,135,0.5), rgba(0,10,28,0.8)); }
+
+  .play-btn {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(0,180,216,0.15);
+    border: 1.5px solid var(--nn-cyan);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .play-btn:hover { transform: scale(1.1); background: rgba(0,180,216,0.25); }
+
+  .play-btn svg { margin-left: 5px; }
+
+  .video-placeholder-text {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--nn-white);
+    opacity: 0.9;
+  }
+
+  .video-placeholder-sub {
+    font-size: 13px;
+    color: var(--nn-gray);
+    font-family: var(--font-mono);
+  }
+
+  .video-url-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .video-url-input {
+    flex: 1;
+    padding: 12px 18px;
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid var(--nn-border);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--nn-white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .video-url-input::placeholder { color: var(--nn-gray); }
+  .video-url-input:focus { border-color: var(--nn-border-bright); }
+
+  .video-url-btn {
+    padding: 12px 24px;
+    background: var(--nn-blue-mid);
+    border: none;
+    border-radius: 100px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .video-url-btn:hover { background: var(--nn-blue-light); }
+
+  /* ===================== FEATURES GRID ===================== */
+  #features {
+    padding: 120px 48px;
+    background: linear-gradient(180deg, transparent, rgba(0,30,70,0.3), transparent);
+  }
+
+  .features-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1px;
+    border: 0.5px solid var(--nn-border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .feature-card {
+    padding: 40px;
+    background: var(--nn-card);
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--nn-border-bright), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s;
+  }
+
+  .feature-card:hover { background: rgba(0,180,216,0.04); }
+  .feature-card:hover::before { transform: scaleX(1); }
+
+  .feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: rgba(0,180,216,0.1);
+    border: 0.5px solid var(--nn-border-bright);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .feature-icon svg { width: 20px; height: 20px; }
+
+  .feature-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--nn-border-bright);
+    margin-bottom: 10px;
+  }
+
+  .feature-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--nn-white);
+  }
+
+  .feature-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--nn-gray);
+    line-height: 1.7;
+  }
+
+  .feature-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 4px 12px;
+    background: rgba(0,180,216,0.08);
+    border: 0.5px solid var(--nn-border-bright);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nn-cyan);
+  }
+
+  /* ===================== TECH STACK ===================== */
+  #tech {
+    padding: 120px 48px;
+  }
+
+  .tech-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .tech-left { }
+
+  .tech-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .tech-card {
+    padding: 24px;
+    background: var(--nn-card);
+    border: 0.5px solid var(--nn-border);
+    border-radius: 14px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .tech-card:hover {
+    border-color: var(--nn-border-bright);
+    transform: translateY(-4px);
+  }
+
+  .tech-card-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .tech-card-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .tech-card-role {
+    font-size: 12px;
+    color: var(--nn-gray);
+    line-height: 1.5;
+  }
+
+  /* ===================== PRODUCT INFO ===================== */
+  #product {
+    padding: 120px 48px;
+    background: linear-gradient(180deg, transparent, rgba(0,30,70,0.25), transparent);
+  }
+
+  .product-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .product-pen-visual {
+    position: sticky;
+    top: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .stat-card {
+    padding: 28px 32px;
+    background: var(--nn-card);
+    border: 0.5px solid var(--nn-border);
+    border-radius: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .stat-card:hover {
+    border-color: var(--nn-border-bright);
+    transform: translateX(6px);
+  }
+
+  .stat-number {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--nn-cyan);
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 90px;
+  }
+
+  .stat-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--nn-white);
+    margin-bottom: 4px;
+  }
+
+  .stat-desc {
+    font-size: 13px;
+    color: var(--nn-gray);
+    line-height: 1.6;
+  }
+
+  /* ===================== DIGITAL AVATAR / HCP SECTION ===================== */
+  #hcp {
+    padding: 120px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hcp-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,48,135,0.15), transparent 60%);
+    pointer-events: none;
+  }
+
+  .avatar-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .avatar-visual {
+    position: relative;
+  }
+
+  .avatar-frame {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 0.5px solid var(--nn-border);
+    background: linear-gradient(135deg, rgba(0,48,135,0.2), rgba(0,10,28,0.8));
+    aspect-ratio: 3/4;
+    max-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Digital avatar SVG inside the frame */
+  .avatar-svg-wrap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .avatar-speech-bubble {
+    position: absolute;
+    top: 20px; right: -40px;
+    background: rgba(0,180,216,0.1);
+    border: 0.5px solid var(--nn-border-bright);
+    border-radius: 14px;
+    padding: 14px 18px;
+    max-width: 220px;
+    backdrop-filter: blur(10px);
+  }
+
+  .bubble-text {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--nn-white);
+    line-height: 1.5;
+  }
+
+  .bubble-text strong {
+    color: var(--nn-cyan);
+    font-weight: 500;
+  }
+
+  .avatar-content {}
+
+  .qa-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .qa-item {
+    padding: 20px 24px;
+    background: var(--nn-card);
+    border: 0.5px solid var(--nn-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: none;
+  }
+  .qa-item:hover { border-color: var(--nn-border-bright); background: rgba(0,180,216,0.04); }
+  .qa-item.open { border-color: var(--nn-border-bright); background: rgba(0,180,216,0.06); }
+
+  .qa-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--nn-white);
+  }
+
+  .qa-toggle {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 0.5px solid var(--nn-border-bright);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: var(--nn-cyan);
+    transition: transform 0.3s;
+  }
+
+  .qa-item.open .qa-toggle { transform: rotate(45deg); }
+
+  .qa-a {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--nn-gray);
+    line-height: 1.7;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding-top 0.3s;
+  }
+  .qa-item.open .qa-a { max-height: 200px; padding-top: 12px; }
+
+  /* ===================== CAROUSEL SECTION ===================== */
+  #pens {
+    padding: 120px 48px;
+    background: linear-gradient(180deg, transparent, rgba(0,30,70,0.2), transparent);
+  }
+
+  .pen-carousel {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .pen-cards-row {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+  }
+  .pen-cards-row::-webkit-scrollbar { display: none; }
+
+  .pen-card {
+    flex-shrink: 0;
+    width: 240px;
+    scroll-snap-align: start;
+    padding: 28px;
+    background: var(--nn-card);
+    border: 0.5px solid var(--nn-border);
+    border-radius: 16px;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: none;
+  }
+
+  .pen-card:first-child {
+    border-color: var(--nn-border-bright);
+    background: rgba(0,180,216,0.06);
+  }
+
+  .pen-card:hover {
+    border-color: var(--nn-border-bright);
+    transform: translateY(-4px);
+  }
+
+  .pen-card-status {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .pen-card-status.active { color: var(--nn-cyan); }
+  .pen-card-status.soon { color: var(--nn-gray); }
+
+  .pen-card-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .pen-card-desc {
+    font-size: 12px;
+    color: var(--nn-gray);
+    line-height: 1.6;
+  }
+
+  .pen-card-coming {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 4px 10px;
+    background: rgba(136,146,164,0.1);
+    border: 0.5px solid rgba(136,146,164,0.2);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--nn-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ===================== SUSTAINABILITY ===================== */
+  #sustainability {
+    padding: 120px 48px;
+  }
+
+  .sustain-layout {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .sustain-big-stat {
+    text-align: center;
+    margin-bottom: 72px;
+  }
+
+  .sustain-number {
+    font-family: var(--font-display);
+    font-size: clamp(72px, 12vw, 144px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: transparent;
+    background: linear-gradient(135deg, #4A7FD4, var(--nn-cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .sustain-unit {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 4vw, 48px);
+    font-weight: 600;
+    color: var(--nn-gray);
+    margin-left: 8px;
+  }
+
+  .sustain-caption {
+    font-size: 16px;
+    color: var(--nn-gray);
+    margin-top: 12px;
+  }
+
+  .sustain-compare {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .sustain-pen-count {
+    padding: 32px;
+    background: var(--nn-card);
+    border: 0.5px solid var(--nn-border);
+    border-radius: 16px;
+    text-align: center;
+  }
+
+  .sustain-pen-count.vs {
+    border-color: var(--nn-border-bright);
+    background: rgba(0,180,216,0.06);
+  }
+
+  .count-num {
+    font-family: var(--font-display);
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .count-num.blue { color: var(--nn-cyan); }
+  .count-num.gray { color: var(--nn-gray); }
+
+  .count-label {
+    font-size: 13px;
+    color: var(--nn-gray);
+  }
+
+  .vs-text {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--nn-border-bright);
+    text-align: center;
+  }
+
+  /* ===================== SCRIPTS SECTION ===================== */
+  #scripts {
+    padding: 120px 48px;
+    background: linear-gradient(180deg, transparent, rgba(0,30,70,0.2), transparent);
+  }
+
+  .scripts-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .script-card {
+    padding: 24px;
+    background: var(--nn-card);
+    border: 0.5px solid var(--nn-border);
+    border-radius: 14px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .script-card:hover {
+    border-color: var(--nn-border-bright);
+    transform: translateY(-3px);
+  }
+
+  .script-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .script-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .dot-blue { background: #4A7FD4; }
+  .dot-cyan { background: var(--nn-cyan); }
+  .dot-green { background: #2DC571; }
+  .dot-amber { background: #F5A623; }
+  .dot-purple { background: #9B59B6; }
+
+  .script-name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--nn-white);
+  }
+
+  .script-desc {
+    font-size: 12px;
+    color: var(--nn-gray);
+    line-height: 1.6;
+  }
+
+  .script-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .script-tag {
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid var(--nn-border);
+    color: var(--nn-gray);
+  }
+
+  /* ===================== FOOTER ===================== */
+  footer {
+    padding: 60px 48px 40px;
+    border-top: 0.5px solid var(--nn-border);
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .footer-brand {
+    max-width: 320px;
+  }
+
+  .footer-brand-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: var(--nn-white);
+  }
+
+  .footer-brand-desc {
+    font-size: 13px;
+    color: var(--nn-gray);
+    line-height: 1.7;
+  }
+
+  .footer-disclaimer {
+    font-size: 11px;
+    color: rgba(136,146,164,0.5);
+    line-height: 1.6;
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding-top: 20px;
+    border-top: 0.5px solid var(--nn-border);
+  }
+
+  /* ===================== ANIMATIONS ===================== */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===================== SCROLLBAR ===================== */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--nn-navy); }
+  ::-webkit-scrollbar-thumb { background: var(--nn-border-bright); border-radius: 2px; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    #hero, #demo, #features, #tech, #product, #hcp, #pens, #sustainability, #scripts { padding: 80px 20px; }
+    .tech-layout, .product-layout, .avatar-section { grid-template-columns: 1fr; gap: 48px; }
+    .sustain-compare { grid-template-columns: 1fr; }
+    .vs-text { display: none; }
+    .footer-inner { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Stars background -->
+<canvas id="stars"></canvas>
+
+<!-- ===================== NAVIGATION ===================== -->
+<nav>
+  <a href="#hero" class="nav-logo">
+    <div class="nav-logo-mark">SD</div>
+    Pen® 3D Interactive Showcase
+  </a>
+  <ul class="nav-links">
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#product">Product</a></li>
+    <li><a href="#hcp">HCP Guide</a></li>
+    <li><a href="#scripts">Scripts</a></li>
+  </ul>
+  <a href="#demo" class="nav-cta">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1"/>
+      <path d="M5.5 5L9 7L5.5 9V5Z" fill="currentColor"/>
+    </svg>
+    Watch Demo
+  </a>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero">
+  <div class="hero-ambient"></div>
+  <div class="hero-ambient-2"></div>
+
+  <div class="eyebrow">
+    <div class="eyebrow-dot"></div>
+    PEN · Unity 3D Interactive Experience
+  </div>
+
+  <h1 class="hero-title">
+    <span class="hero-title-line">Pen<sup style="font-size:0.5em;vertical-align:super;">®</sup></span>
+    <span class="hero-title-line hero-title-blue">Reimagined</span>
+    <span class="hero-title-line" style="color:var(--nn-gray);font-size:0.6em;font-weight:400;letter-spacing:-0.01em;">in 3D</span>
+  </h1>
+
+  <p class="hero-sub">
+    An immersive, interactive 3D training experience for Pen® — built in Unity with real-time animation, click-to-explore anatomy, and guided injection workflows.
+  </p>
+
+  <div class="hero-buttons">
+    <a href="#demo" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        <path d="M6.5 5.5L11 8L6.5 10.5V5.5Z" fill="white"/>
+      </svg>
+      View Demo
+    </a>
+    <a href="#features" class="btn-outline">
+      Explore Features →
+    </a>
+  </div>
+
+  <div class="hero-visual">
+    <div class="pen-canvas">
+      <div class="pen-3d-container">
+        <!-- 3D Pen SVG illustration -->
+        <svg class="pen-float" viewBox="0 0 700 180" width="700" height="180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="penBody" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#4A4E58"/>
+              <stop offset="40%" style="stop-color:#2C2F38"/>
+              <stop offset="100%" style="stop-color:#1A1D24"/>
+            </linearGradient>
+            <linearGradient id="penAccent" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#6A6E7A"/>
+              <stop offset="100%" style="stop-color:#3A3D48"/>
+            </linearGradient>
+            <linearGradient id="penCartridge" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#00B4D8;stop-opacity:0.3"/>
+              <stop offset="100%" style="stop-color:#003087;stop-opacity:0.5"/>
+            </linearGradient>
+            <linearGradient id="penHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:rgba(255,255,255,0.15)"/>
+              <stop offset="100%" style="stop-color:rgba(255,255,255,0)"/>
+            </linearGradient>
+            <filter id="penGlow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Needle cap tip -->
+          <polygon points="50,82 68,74 68,106 50,98" fill="#3A3D48" stroke="#555" stroke-width="0.5"/>
+          <rect x="68" y="76" width="18" height="28" rx="3" fill="#4A4E58" stroke="#666" stroke-width="0.5"/>
+
+          <!-- Main pen body -->
+          <rect x="86" y="58" width="420" height="64" rx="10" fill="url(#penBody)" stroke="#555" stroke-width="0.5"/>
+
+          <!-- Pen highlight top -->
+          <rect x="86" y="58" width="420" height="22" rx="10" fill="url(#penHighlight)" opacity="0.6"/>
+
+          <!-- Cartridge window (glass) -->
+          <rect x="130" y="68" width="120" height="44" rx="4" fill="url(#penCartridge)" stroke="rgba(0,180,216,0.4)" stroke-width="0.5"/>
+          <rect x="135" y="72" width="110" height="12" rx="2" fill="rgba(255,255,255,0.07)"/>
+
+          <!-- Cartridge level indicator -->
+          <rect x="136" y="86" width="80" height="4" rx="2" fill="rgba(0,180,216,0.3)"/>
+          <rect x="136" y="86" width="80" height="4" rx="2" fill="rgba(0,180,216,0.6)" clip-path="url(#levelClip)"/>
+
+          <!-- Scale markings -->
+          <line x1="160" y1="68" x2="160" y2="74" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+          <line x1="190" y1="68" x2="190" y2="74" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+          <line x1="220" y1="68" x2="220" y2="74" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+
+          <!-- Label area -->
+          <rect x="270" y="66" width="180" height="48" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+          <text x="360" y="87" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-family="'Syne', sans-serif" font-size="11" font-weight="700" letter-spacing="0.1em">PEN</text>
+          <text x="360" y="101" text-anchor="middle" fill="rgba(0,180,216,0.9)" font-family="'Syne', sans-serif" font-size="9" font-weight="400" letter-spacing="0.15em">®</text>
+
+          <!-- Grip section ridges -->
+          <line x1="466" y1="64" x2="466" y2="116" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="3,4"/>
+          <line x1="474" y1="64" x2="474" y2="116" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="3,4"/>
+          <line x1="482" y1="64" x2="482" y2="116" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="3,4"/>
+          <line x1="490" y1="64" x2="490" y2="116" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="3,4"/>
+
+          <!-- Dose dial -->
+          <circle cx="534" cy="90" r="28" fill="url(#penAccent)" stroke="#777" stroke-width="0.5"/>
+          <circle cx="534" cy="90" r="22" fill="#1A1D24" stroke="#555" stroke-width="0.5"/>
+          <text x="534" y="87" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-family="'DM Mono', monospace" font-size="14" font-weight="500">20</text>
+          <text x="534" y="100" text-anchor="middle" fill="rgba(0,180,216,0.7)" font-family="'DM Mono', monospace" font-size="8">UNITS</text>
+
+          <!-- Small tick marks on dial -->
+          <line x1="534" y1="62" x2="534" y2="68" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <line x1="506" y1="90" x2="512" y2="90" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <line x1="556" y1="90" x2="562" y2="90" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+
+          <!-- Push button (does not extend) -->
+          <rect x="506" y="62" width="150" height="56" rx="8" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+          <rect x="574" y="68" width="42" height="44" rx="6" fill="#3A3D48" stroke="#666" stroke-width="0.5"/>
+          <rect x="576" y="70" width="38" height="18" rx="4" fill="url(#penHighlight)" opacity="0.5"/>
+
+          <!-- Pen cap end -->
+          <rect x="620" y="62" width="66" height="56" rx="8" fill="url(#penAccent)" stroke="#777" stroke-width="0.5"/>
+          <text x="653" y="94" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="'DM Mono', monospace" font-size="9">SD</text>
+
+          <!-- Glow on cyan elements -->
+          <circle cx="534" cy="90" r="28" fill="none" stroke="rgba(0,180,216,0.2)" stroke-width="2" filter="url(#penGlow)"/>
+        </svg>
+
+        <!-- Labels pointing to parts -->
+        <div style="position:absolute;top:10px;left:60px;display:flex;align-items:center;gap:8px;opacity:0;animation:fade-in 0.6s 1.5s forwards;">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--nn-cyan);box-shadow:0 0 8px var(--nn-cyan);"></div>
+          <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;color:var(--nn-cyan);text-transform:uppercase;">Penfill® Cartridge</span>
+        </div>
+
+        <div style="position:absolute;top:10px;right:120px;display:flex;align-items:center;gap:8px;opacity:0;animation:fade-in 0.6s 1.8s forwards;">
+          <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;color:var(--nn-cyan);text-transform:uppercase;">Dose Dial</span>
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--nn-cyan);box-shadow:0 0 8px var(--nn-cyan);"></div>
+        </div>
+
+        <div style="position:absolute;bottom:14px;right:60px;display:flex;align-items:center;gap:8px;opacity:0;animation:fade-in 0.6s 2.1s forwards;">
+          <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;color:rgba(136,146,164,0.8);text-transform:uppercase;">Non-extending button</span>
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--nn-gray);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats ticker -->
+  <div class="stats-ticker">
+    <div class="ticker-track" id="ticker">
+      <div class="ticker-item"><span class="val">85%</span> Patient Confidence<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">2 Years</span> Lifetime<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">80 Units</span> Max Dose<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">Unity 3D</span> Interactive<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">&lt;8 min</span> Training Time<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">8kg</span> Plastic Saved/Year<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">C#</span> Scripted<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">Blender</span> 3D Model<div class="ticker-sep"></div></div>
+      <!-- Duplicate for seamless loop -->
+      <div class="ticker-item"><span class="val">85%</span> Patient Confidence<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">2 Years</span> Lifetime<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">80 Units</span> Max Dose<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">Unity 3D</span> Interactive<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">&lt;8 min</span> Training Time<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">8kg</span> Plastic Saved/Year<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">C#</span> Scripted<div class="ticker-sep"></div></div>
+      <div class="ticker-item"><span class="val">Blender</span> 3D Model<div class="ticker-sep"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DEMO VIDEO ===================== -->
+<section id="demo">
+  <div class="section-header reveal">
+    <div class="section-label">// Showcase</div>
+    <h2 class="section-title">See the Experience<br>in Action</h2>
+    <p class="section-sub">Watch the full 3D interactive build from carousel navigation to clickable pen anatomy and guided injection workflows.</p>
+  </div>
+
+  <div class="video-wrapper reveal">
+    <div class="video-frame" id="videoFrame">
+      <div class="video-placeholder" id="videoPlaceholder" onclick="triggerVideoLoad()">
+        <div class="play-btn">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M8 6L17 11L8 16V6Z" fill="#00B4D8"/>
+          </svg>
+        </div>
+        <div class="video-placeholder-text">Play Demo Video</div>
+        <div class="video-placeholder-sub">Add your YouTube URL below</div>
+      </div>
+      <iframe id="ytEmbed" src="" allow="autoplay; encrypted-media" allowfullscreen style="display:none;"></iframe>
+    </div>
+
+    <div class="video-url-input-row">
+      <input
+        type="text"
+        class="video-url-input"
+        id="ytUrlInput"
+        placeholder="https://www.youtube.com/watch?v=... or youtu.be/..."
+      />
+      <button class="video-url-btn" onclick="loadVideo()">Load Video</button>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--nn-gray);margin-top:12px;font-family:var(--font-mono);">
+      Paste any YouTube link — the embed will load instantly
+    </p>
+  </div>
+</section>
+
+<!-- ===================== FEATURES GRID ===================== -->
+<section id="features">
+  <div class="section-header reveal">
+    <div class="section-label">// interaction design</div>
+    <h2 class="section-title">Built for Learning,<br>Designed for Engagement</h2>
+    <p class="section-sub">Every interaction in the experience is purposefully crafted for HCP training and patient education.</p>
+  </div>
+
+  <div class="features-grid" style="max-width:1200px;margin:0 auto;">
+    <div class="feature-card reveal">
+      <div class="feature-num">01</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="8" stroke="#00B4D8" stroke-width="1"/>
+          <path d="M7 10L9 12L13 8" stroke="#00B4D8" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feature-title">Clickable Part Anatomy</div>
+      <div class="feature-desc">Each pen component is a clickable 3D collider. Hover highlighting, priority-based selection, and cool-down management create a natural exploration experience.</div>
+      <div class="feature-tag">ClickablePart.cs · ClickManager.cs</div>
+    </div>
+
+    <div class="feature-card reveal">
+      <div class="feature-num">02</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="5" width="16" height="10" rx="2" stroke="#00B4D8" stroke-width="1"/>
+          <path d="M6 10L10 7L14 10" stroke="#00B4D8" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feature-title">7-Panel Carousel Menu</div>
+      <div class="feature-desc">Swipeable, keyboard-navigable 3D carousel showcasing all pen products with blur/clear transitions.</div>
+      <div class="feature-tag">CarouselMenu.cs · DOTween</div>
+    </div>
+
+    <div class="feature-card reveal">
+      <div class="feature-num">03</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 20 20" fill="none">
+          <path d="M5 10H15M10 5L15 10L10 15" stroke="#00B4D8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="feature-title">Guided Injection Workflow</div>
+      <div class="feature-desc">Step-by-step interactive phases: Prepare Pen, Check Insulin Flow, Select Dose, Inject, After Injection — each with animated 3D response and progress tracking.</div>
+      <div class="feature-tag">NovoPenManager.cs · 5-Phase Flow</div>
+    </div>
+
+    <div class="feature-card reveal">
+      <div class="feature-num">04</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="3" fill="#00B4D8"/>
+          <circle cx="10" cy="10" r="7" stroke="#00B4D8" stroke-width="1" stroke-dasharray="3 2"/>
+        </svg>
+      </div>
+      <div class="feature-title">Universal Pulse Highlights</div>
+      <div class="feature-desc">A universal pulse system that works across mesh renderers, sprite renderers, and UI Images — guiding users to the next interactive step with smooth emission animation.</div>
+      <div class="feature-tag">UniversalPulse.cs · DOTween</div>
+    </div>
+
+    <div class="feature-card reveal">
+      <div class="feature-num">05</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 20 20" fill="none">
+          <rect x="3" y="4" width="6" height="12" rx="2" stroke="#00B4D8" stroke-width="1"/>
+          <rect x="11" y="4" width="6" height="12" rx="2" stroke="rgba(0,180,216,0.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="feature-title">Smart Labels Toggle</div>
+      <div class="feature-desc">Contextual labels that appear based on pen state — different panels showing different label sets depending on whether the pen is in animated or default position.</div>
+      <div class="feature-tag">LabelsToggle.cs · State-aware</div>
+    </div>
+
+    <div class="feature-card reveal">
+      <div class="feature-num">06</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 20 20" fill="none">
+          <path d="M4 14V8L10 4L16 8V14L10 17L4 14Z" stroke="#00B4D8" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="feature-title">Expandable Sidebar Panel</div>
+      <div class="feature-desc">A product info panel that slides open, repositioning the camera, model, and UI elements in perfect choreography — built with DOTween sequences and camera animation.</div>
+      <div class="feature-tag">PanelToggleController.cs · Camera Rig</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TECH STACK ===================== -->
+<section id="tech">
+  <div class="tech-layout reveal">
+    <div class="tech-left">
+      <div class="section-label">// built with</div>
+      <h2 class="section-title" style="text-align:left;max-width:400px;margin:16px 0 20px;">The Full Technology Stack</h2>
+      <p class="section-sub" style="text-align:left;margin:0 0 32px;">
+        Every tool chosen for a reason — from the real-time rendering of Unity to the precision sculpting of Blender and the material fidelity of Substance Painter.
+      </p>
+      <a href="#demo" class="btn-outline" style="display:inline-flex;">Explore the Demo →</a>
+    </div>
+
+    <div class="tech-right">
+      <div class="tech-card reveal">
+        <div class="tech-card-icon">🎮</div>
+        <div class="tech-card-name">Unity</div>
+        <div class="tech-card-role">Real-time 3D rendering, UI system, DOTween animations, raycasting interaction</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon">🔷</div>
+        <div class="tech-card-name">C#</div>
+        <div class="tech-card-role">Custom interaction managers, carousel logic, workflow state machines</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon">🎨</div>
+        <div class="tech-card-name">Blender</div>
+        <div class="tech-card-role">Pen® 3D modeling, UV unwrapping, mesh optimization</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon">🖌️</div>
+        <div class="tech-card-name">Substance</div>
+        <div class="tech-card-role">PBR texturing, material painting, anthracite grey finish replication</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon">🖼️</div>
+        <div class="tech-card-name">Photoshop</div>
+        <div class="tech-card-role">UI design, label artwork, icon creation and texture layering</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon">⚡</div>
+        <div class="tech-card-name">DOTween</div>
+        <div class="tech-card-role">All animation sequencing — fades, punches, scales, carousel transitions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRODUCT INFO ===================== -->
+<section id="product">
+  <div class="product-layout" style="max-width:1200px;margin:0 auto;">
+    <div class="product-pen-visual reveal">
+      <!-- Large pen illustration -->
+      <svg viewBox="0 0 300 600" width="300" height="600" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 20px 80px rgba(0,180,216,0.15))">
+        <defs>
+          <linearGradient id="vpenBody" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#1A1D24"/>
+            <stop offset="40%" style="stop-color:#2C2F38"/>
+            <stop offset="70%" style="stop-color:#3A3D48"/>
+            <stop offset="100%" style="stop-color:#1A1D24"/>
+          </linearGradient>
+          <linearGradient id="vpenHL" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:rgba(255,255,255,0)"/>
+            <stop offset="30%" style="stop-color:rgba(255,255,255,0.12)"/>
+            <stop offset="100%" style="stop-color:rgba(255,255,255,0)"/>
+          </linearGradient>
+          <linearGradient id="vCartridge" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:rgba(0,180,216,0.4)"/>
+            <stop offset="100%" style="stop-color:rgba(0,48,135,0.6)"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Needle cap -->
+        <polygon points="150,30 110,60 110,100 150,70" fill="#3A3D48"/>
+        <rect x="110" y="60" width="40" height="40" fill="#4A4E58" stroke="#666" stroke-width="0.5"/>
+
+        <!-- Body -->
+        <rect x="80" y="100" width="140" height="350" rx="16" fill="url(#vpenBody)" stroke="#555" stroke-width="0.5"/>
+
+        <!-- Highlight edge -->
+        <rect x="80" y="100" width="40" height="350" rx="8" fill="url(#vpenHL)" opacity="0.8"/>
+
+        <!-- Cartridge window -->
+        <rect x="90" y="130" width="120" height="120" rx="8" fill="url(#vCartridge)" stroke="rgba(0,180,216,0.4)" stroke-width="0.5"/>
+        <rect x="96" y="136" width="108" height="28" rx="4" fill="rgba(255,255,255,0.07)"/>
+
+        <!-- Cartridge level -->
+        <rect x="98" y="175" width="104" height="6" rx="3" fill="rgba(0,180,216,0.2)"/>
+        <rect x="98" y="175" width="70" height="6" rx="3" fill="rgba(0,180,216,0.7)"/>
+
+        <!-- Scale lines -->
+        <line x1="108" y1="130" x2="108" y2="143" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <line x1="128" y1="130" x2="128" y2="143" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <line x1="148" y1="130" x2="148" y2="143" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <line x1="168" y1="130" x2="168" y2="143" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+        <line x1="188" y1="130" x2="188" y2="143" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+
+        <!-- Logo label -->
+        <rect x="90" y="270" width="120" height="80" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+        <text x="150" y="305" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-family="Syne,sans-serif" font-size="16" font-weight="800" letter-spacing="0.05em">Pen</text>
+        <text x="150" y="326" text-anchor="middle" fill="rgba(0,180,216,0.9)" font-family="Syne,sans-serif" font-size="11" letter-spacing="0.2em">Interaction®</text>
+
+        <!-- Grip ridges -->
+        <line x1="94" y1="370" x2="206" y2="370" stroke="rgba(255,255,255,0.1)" stroke-width="2" stroke-dasharray="4,5"/>
+        <line x1="94" y1="380" x2="206" y2="380" stroke="rgba(255,255,255,0.1)" stroke-width="2" stroke-dasharray="4,5"/>
+        <line x1="94" y1="390" x2="206" y2="390" stroke="rgba(255,255,255,0.1)" stroke-width="2" stroke-dasharray="4,5"/>
+
+        <!-- Dose button (does not extend) -->
+        <rect x="90" y="415" width="120" height="60" rx="10" fill="#2A2D36" stroke="#666" stroke-width="0.5"/>
+        <circle cx="150" cy="445" r="22" fill="url(#vpenBody)" stroke="#777" stroke-width="0.5"/>
+        <circle cx="150" cy="445" r="16" fill="#111318" stroke="#555" stroke-width="0.5"/>
+        <text x="150" y="441" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-family="'DM Mono',monospace" font-size="11" font-weight="500">20</text>
+        <text x="150" y="454" text-anchor="middle" fill="rgba(0,180,216,0.7)" font-family="'DM Mono',monospace" font-size="7">UNITS</text>
+
+        <!-- Needle tip glow -->
+        <circle cx="150" cy="28" r="4" fill="rgba(0,180,216,0.4)"/>
+        <circle cx="150" cy="28" r="8" fill="none" stroke="rgba(0,180,216,0.2)" stroke-width="1"/>
+
+        <!-- Glow on cartridge -->
+        <rect x="90" y="130" width="120" height="120" rx="8" fill="none" stroke="rgba(0,180,216,0.15)" stroke-width="3"/>
+      </svg>
+    </div>
+
+    <div class="product-stats">
+      <div class="section-label" style="margin-bottom:8px;">// product specs</div>
+      <h2 class="section-title" style="text-align:left;max-width:400px;margin:0 0 36px;font-size:36px;">Pen® at a Glance</h2>
+
+      <div class="stat-card reveal">
+        <div class="stat-number">85%</div>
+        <div>
+          <div class="stat-label">Patient Confidence</div>
+          <div class="stat-desc">of patients are very or extremely confident in full dose delivery (n=100).</div>
+        </div>
+      </div>
+
+      <div class="stat-card reveal">
+        <div class="stat-number">2yr</div>
+        <div>
+          <div class="stat-label">Pen Lifetime</div>
+          <div class="stat-desc">Guaranteed 2-year lifespan with 3 daily injections. Only the Penfill® 3ml cartridge needs replacing — not the entire pen.</div>
+        </div>
+      </div>
+
+      <div class="stat-card reveal">
+        <div class="stat-number">80U</div>
+        <div>
+          <div class="stat-label">Maximum Dose</div>
+          <div class="stat-desc">Variable dosing up to 80 units in 1-unit increments. The dose button does not extend at any dose — a key Pen® feature retained.</div>
+        </div>
+      </div>
+
+      <div class="stat-card reveal">
+        <div class="stat-number">8kg</div>
+        <div>
+          <div class="stat-label">Plastic Saved Per Year</div>
+          <div class="stat-desc">Switching 10 patients from Tresiba® to Pen® saves up to 8kg of plastic waste annually — equivalent to ~380 plastic bottles.</div>
+        </div>
+      </div>
+
+      <div class="stat-card reveal">
+        <div class="stat-number">&lt;8</div>
+        <div>
+          <div class="stat-label">Minutes to Train</div>
+          <div class="stat-desc">Learning to use Pen® takes under 10 minutes on average for pen-injector experienced patients — enabling rapid clinical adoption.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HCP GUIDE / DIGITAL AVATAR ===================== -->
+<section id="hcp">
+  <div class="hcp-bg"></div>
+
+  <div class="avatar-section reveal" style="max-width:1200px;margin:0 auto;">
+    <div class="avatar-visual">
+      <div class="avatar-frame">
+        <!-- Digital Avatar SVG illustration -->
+        <svg viewBox="0 0 300 500" width="300" height="500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+          <defs>
+            <linearGradient id="avatarBg" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#0D2B52"/>
+              <stop offset="100%" style="stop-color:#050E1D"/>
+            </linearGradient>
+            <linearGradient id="skinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#F5CBA7"/>
+              <stop offset="100%" style="stop-color:#E8A87C"/>
+            </linearGradient>
+            <linearGradient id="coatGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#E8EDF5"/>
+              <stop offset="100%" style="stop-color:#C8D0E0"/>
+            </linearGradient>
+            <radialGradient id="faceBg" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" style="stop-color:#0D2B52;stop-opacity:0.5"/>
+              <stop offset="100%" style="stop-color:#050E1D;stop-opacity:0"/>
+            </radialGradient>
+          </defs>
+
+          <rect width="300" height="500" fill="url(#avatarBg)"/>
+
+          <!-- Grid background lines -->
+          <line x1="0" y1="100" x2="300" y2="100" stroke="rgba(0,180,216,0.05)" stroke-width="0.5"/>
+          <line x1="0" y1="200" x2="300" y2="200" stroke="rgba(0,180,216,0.05)" stroke-width="0.5"/>
+          <line x1="0" y1="300" x2="300" y2="300" stroke="rgba(0,180,216,0.05)" stroke-width="0.5"/>
+          <line x1="0" y1="400" x2="300" y2="400" stroke="rgba(0,180,216,0.05)" stroke-width="0.5"/>
+          <line x1="100" y1="0" x2="100" y2="500" stroke="rgba(0,180,216,0.05)" stroke-width="0.5"/>
+          <line x1="200" y1="0" x2="200" y2="500" stroke="rgba(0,180,216,0.05)" stroke-width="0.5"/>
+
+          <!-- Body - lab coat -->
+          <ellipse cx="150" cy="480" rx="100" ry="80" fill="url(#coatGrad)" opacity="0.9"/>
+          <rect x="70" y="280" width="160" height="220" rx="20" fill="url(#coatGrad)" opacity="0.9"/>
+
+          <!-- Shirt/tie detail -->
+          <rect x="130" y="290" width="40" height="180" rx="4" fill="#B0C0D8" opacity="0.6"/>
+          <polygon points="150,295 140,310 150,360 160,310" fill="#4A7FD4" opacity="0.8"/>
+
+          <!-- Lab coat lapels -->
+          <polygon points="110,280 150,310 150,290 130,270" fill="white" opacity="0.7"/>
+          <polygon points="190,280 150,310 150,290 170,270" fill="white" opacity="0.7"/>
+
+          <!-- Arms -->
+          <ellipse cx="72" cy="350" rx="24" ry="80" fill="url(#coatGrad)" opacity="0.9"/>
+          <ellipse cx="228" cy="350" rx="24" ry="80" fill="url(#coatGrad)" opacity="0.9"/>
+
+          <!-- Hands -->
+          <ellipse cx="72" cy="430" rx="18" ry="22" fill="url(#skinGrad)" opacity="0.9"/>
+          <ellipse cx="228" cy="430" rx="18" ry="22" fill="url(#skinGrad)" opacity="0.9"/>
+
+          <!-- Neck -->
+          <rect x="130" y="240" width="40" height="50" rx="8" fill="url(#skinGrad)" opacity="0.9"/>
+
+          <!-- Head -->
+          <ellipse cx="150" cy="190" rx="68" ry="80" fill="url(#skinGrad)" opacity="0.95"/>
+
+          <!-- Hair -->
+          <ellipse cx="150" cy="130" rx="70" ry="50" fill="#2C2018" opacity="0.95"/>
+          <ellipse cx="82" cy="165" rx="20" ry="45" fill="#2C2018" opacity="0.9"/>
+          <ellipse cx="218" cy="165" rx="20" ry="45" fill="#2C2018" opacity="0.9"/>
+
+          <!-- Face details -->
+          <!-- Eyebrows -->
+          <path d="M115 165 Q130 160 145 165" fill="none" stroke="#4A3020" stroke-width="3" stroke-linecap="round"/>
+          <path d="M155 165 Q170 160 185 165" fill="none" stroke="#4A3020" stroke-width="3" stroke-linecap="round"/>
+
+          <!-- Eyes -->
+          <ellipse cx="130" cy="180" rx="14" ry="10" fill="white" opacity="0.95"/>
+          <ellipse cx="170" cy="180" rx="14" ry="10" fill="white" opacity="0.95"/>
+          <circle cx="132" cy="180" r="8" fill="#3A2815"/>
+          <circle cx="172" cy="180" r="8" fill="#3A2815"/>
+          <circle cx="134" cy="177" r="3" fill="black"/>
+          <circle cx="174" cy="177" r="3" fill="black"/>
+          <circle cx="136" cy="174" r="2" fill="white" opacity="0.8"/>
+          <circle cx="176" cy="174" r="2" fill="white" opacity="0.8"/>
+
+          <!-- Nose -->
+          <path d="M148 195 Q145 210 140 215 Q150 220 160 215 Q155 210 152 195" fill="rgba(180,120,80,0.4)" stroke="rgba(150,100,60,0.3)" stroke-width="0.5"/>
+
+          <!-- Smile -->
+          <path d="M128 228 Q150 242 172 228" fill="none" stroke="#C07050" stroke-width="2.5" stroke-linecap="round"/>
+
+          <!-- Earrings -->
+          <circle cx="82" cy="185" r="5" fill="rgba(0,180,216,0.8)" stroke="rgba(0,180,216,0.4)" stroke-width="1"/>
+          <circle cx="218" cy="185" r="5" fill="rgba(0,180,216,0.8)" stroke="rgba(0,180,216,0.4)" stroke-width="1"/>
+
+          <!-- Stethoscope -->
+          <path d="M110 265 Q80 290 75 330 Q70 360 90 370 Q110 380 120 360 Q130 340 120 320" fill="none" stroke="#4A7FD4" stroke-width="3" stroke-linecap="round"/>
+          <path d="M190 265 Q220 290 225 330 Q230 360 210 370 Q190 380 180 360 Q170 340 180 320" fill="none" stroke="#4A7FD4" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="150" cy="320" r="12" fill="none" stroke="#4A7FD4" stroke-width="2.5"/>
+          <circle cx="150" cy="320" r="6" fill="#4A7FD4" opacity="0.6"/>
+
+          <!-- Cyan scan lines across body -->
+          <line x1="70" y1="300" x2="230" y2="300" stroke="rgba(0,180,216,0.15)" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="70" y1="330" x2="230" y2="330" stroke="rgba(0,180,216,0.1)" stroke-width="0.5" stroke-dasharray="4 3"/>
+
+          <!-- HCP badge on coat -->
+          <rect x="165" y="305" width="52" height="28" rx="4" fill="rgba(0,180,216,0.2)" stroke="rgba(0,180,216,0.4)" stroke-width="0.5"/>
+          <text x="191" y="316" text-anchor="middle" fill="rgba(0,180,216,0.9)" font-family="monospace" font-size="7" font-weight="700" letter-spacing="0.1em">HCP</text>
+          <text x="191" y="326" text-anchor="middle" fill="rgba(0,180,216,0.6)" font-family="monospace" font-size="5.5">SD</text>
+
+          <!-- Ambient light overlay -->
+          <rect width="300" height="500" fill="url(#faceBg)"/>
+        </svg>
+      </div>
+
+      <!-- Speech bubble -->
+      <div class="avatar-speech-bubble">
+        <div class="bubble-text">
+          <strong>Pen®</strong> is easy to use — our patients learn it in under <strong>8 minutes</strong> on average.
+        </div>
+      </div>
+    </div>
+
+    <div class="avatar-content">
+      <div class="section-label">// hcp objection guide</div>
+      <h2 class="section-title" style="text-align:left;max-width:480px;margin:16px 0 16px;">Common Questions,<br>Clear Answers</h2>
+      <p class="section-sub" style="text-align:left;margin:0 0 8px;">
+        A built-in objection handling system helps reps address HCP concerns in the field — all backed by clinical study data.
+      </p>
+
+      <div class="qa-list">
+        <div class="qa-item" onclick="toggleQA(this)">
+          <div class="qa-q">
+            <span>What makes Pen® different from other pens?</span>
+            <div class="qa-toggle">+</div>
+          </div>
+          <div class="qa-a">Pen® is reusable (up to 2 years), using Penfill® 3ml cartridges instead of the whole pen being discarded. It retains other pen's non-extending dose button and adds a higher 80-unit maximum dose. The environmental footprint is dramatically reduced.</div>
+        </div>
+
+        <div class="qa-item" onclick="toggleQA(this)">
+          <div class="qa-q">
+            <span>Do patients need retraining to switch?</span>
+            <div class="qa-toggle">+</div>
+          </div>
+          <div class="qa-a">No significant retraining required. The familiar pen features are preserved, and learning to use Pen® takes under 10 minutes on average for pen-injector experienced patients.</div>
+        </div>
+
+        <div class="qa-item" onclick="toggleQA(this)">
+          <div class="qa-q">
+            <span>Which insulins work with Pen®?</span>
+            <div class="qa-toggle">+</div>
+          </div>
+          <div class="qa-a">All insulins in Penfill® 3ml cartridges.</div>
+        </div>
+
+        <div class="qa-item" onclick="toggleQA(this)">
+          <div class="qa-q">
+            <span>Does it have connectivity features?</span>
+            <div class="qa-toggle">+</div>
+          </div>
+          <div class="qa-a">No. Pen® does not offer digital connectivity. It is a focused, reliable mechanical device optimised for ease of use and sustainability.</div>
+        </div>
+
+        <div class="qa-item" onclick="toggleQA(this)">
+          <div class="qa-q">
+            <span>What needles are compatible?</span>
+            <div class="qa-toggle">+</div>
+          </div>
+          <div class="qa-a">Other single-use disposable needles up to 8mm length (supplied separately).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PEN CAROUSEL ===================== -->
+<section id="pens">
+  <div class="section-header reveal">
+    <div class="section-label">// product lineup</div>
+    <h2 class="section-title">The <br>Pen Family</h2>
+    <p class="section-sub">All the carousel panels from the Unity experience — representing the full device ecosystem.</p>
+  </div>
+
+  <div class="pen-carousel reveal">
+    <div class="pen-cards-row">
+      <div class="pen-card">
+        <div class="pen-card-status active">● Active</div>
+        <div class="pen-card-name">Pen - 1®</div>
+        <div class="pen-card-desc">Reusable, easy-to-use insulin pen. Up to 2 years, 80-unit max dose, non-extending button.</div>
+      </div>
+      <div class="pen-card">
+        <div class="pen-card-status soon">○ Coming Soon</div>
+        <div class="pen-card-name">Pen - 2®</div>
+        <div class="pen-card-desc">Memory function records time and dose of last injection for improved adherence.</div>
+        <div class="pen-card-coming">Coming Soon</div>
+      </div>
+      <div class="pen-card">
+        <div class="pen-card-status soon">○ Coming Soon</div>
+        <div class="pen-card-name">Pen - 3®</div>
+        <div class="pen-card-desc">Half-unit dosing for paediatric patients with memory function display.</div>
+        <div class="pen-card-coming">Coming Soon</div>
+      </div>
+      <div class="pen-card">
+        <div class="pen-card-status soon">○ Coming Soon</div>
+        <div class="pen-card-name">Pen - 4®</div>
+        <div class="pen-card-desc">Classic reusable pen, 5-year lifetime, 60-unit max dose with push-button mechanism.</div>
+        <div class="pen-card-coming">Coming Soon</div>
+      </div>
+      <div class="pen-card">
+        <div class="pen-card-status soon">○ Coming Soon</div>
+        <div class="pen-card-name">Pen - 5®</div>
+        <div class="pen-card-desc">Pre-filled disposable pen with the iconic non-extending dose button design.</div>
+        <div class="pen-card-coming">Coming Soon</div>
+      </div>
+      <div class="pen-card">
+        <div class="pen-card-status soon">○ Coming Soon</div>
+        <div class="pen-card-name">Pen - 6®</div>
+        <div class="pen-card-desc">Durable pre-filled pen with audible click mechanism for dose confirmation.</div>
+        <div class="pen-card-coming">Coming Soon</div>
+      </div>
+      <div class="pen-card">
+        <div class="pen-card-status soon">○ In Build</div>
+        <div class="pen-card-name">Pen - 7</div>
+        <div class="pen-card-desc">Specialized smart device pen with extended features under development.</div>
+        <div class="pen-card-coming">In Development</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SUSTAINABILITY ===================== -->
+<section id="sustainability">
+  <div class="sustain-layout">
+    <div class="section-header reveal" style="margin-bottom:52px;">
+      <div class="section-label">// environmental impact</div>
+      <h2 class="section-title">A Smaller Plastic Footprint</h2>
+      <p class="section-sub">The environmental case for switching patients from disposable to reusable insulin delivery.</p>
+    </div>
+
+    <div class="sustain-big-stat reveal">
+      <div>
+        <span class="sustain-number">8</span>
+        <span class="sustain-unit">kg</span>
+      </div>
+      <div class="sustain-caption">of plastic waste saved per year when switching 10 patients from FlexTouch® to DuraTouch®</div>
+    </div>
+
+    <div class="sustain-compare reveal">
+      <div class="sustain-pen-count">
+        <div class="count-num gray">98×</div>
+        <div class="count-label">FlexTouch® pens used over 2 years<br><span style="font-size:11px;">(assuming 40IU/day, 300IU/pen)</span></div>
+      </div>
+      <div class="vs-text">vs</div>
+      <div class="sustain-pen-count vs">
+        <div class="count-num blue">1×</div>
+        <div class="count-label">DuraTouch® pen used over 2 years<br><span style="font-size:11px;">Only cartridges replaced, not the pen</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:40px;" class="reveal">
+      <div style="padding:24px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:14px;text-align:center;">
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:800;color:var(--nn-cyan);">30%</div>
+        <div style="font-size:13px;color:var(--nn-gray);margin-top:4px;">plastic reduction target per patient by 2033</div>
+      </div>
+      <div style="padding:24px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:14px;text-align:center;">
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:800;color:var(--nn-cyan);">550km</div>
+        <div style="font-size:13px;color:var(--nn-gray);margin-top:4px;">car emissions saved per 10 patients switching per year</div>
+      </div>
+      <div style="padding:24px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:14px;text-align:center;">
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:800;color:var(--nn-cyan);">380×</div>
+        <div style="font-size:13px;color:var(--nn-gray);margin-top:4px;">plastic bottles equivalent saved per year (10 patients)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SCRIPTS ===================== -->
+<section id="scripts">
+  <div class="section-header reveal">
+    <div class="section-label">// codebase</div>
+    <h2 class="section-title">The Architecture Behind<br>the Experience</h2>
+    <p class="section-sub">20+ custom Unity C# scripts powering every interaction, animation, and workflow in the build.</p>
+  </div>
+
+  <div class="scripts-grid">
+    <div class="script-card reveal">
+      <div class="script-card-header">
+        <div class="script-dot dot-cyan"></div>
+        <span class="script-name">CarouselMenu.cs</span>
+      </div>
+      <div class="script-desc">The 3D Panel carousel with swipe detection, dot navigation, async animation, and panels with button reveal system.</div>
+      <div class="script-tags">
+        <span class="script-tag">DOTween</span>
+        <span class="script-tag">async/await</span>
+        <span class="script-tag">Touch/Swipe</span>
+      </div>
+    </div>
+
+    <div class="script-card reveal">
+      <div class="script-card-header">
+        <div class="script-dot dot-blue"></div>
+        <span class="script-name">ClickablePart.cs</span>
+      </div>
+      <div class="script-desc">Priority-based clickable 3D part system with emission highlight pulsing, cooldowns, UI canvas fade, and global part tracking.</div>
+      <div class="script-tags">
+        <span class="script-tag">Priority System</span>
+        <span class="script-tag">Emission Pulse</span>
+        <span class="script-tag">Static Tracking</span>
+      </div>
+    </div>
+
+    <div class="script-card reveal">
+      <div class="script-card-header">
+        <div class="script-dot dot-green"></div>
+        <span class="script-name">PenManager.cs</span>
+      </div>
+      <div class="script-desc">Full 5-phase injection workflow (Prepare, Check Flow, Select Dose, Inject, After) with step sequencing, reversals, and pulse integration.</div>
+      <div class="script-tags">
+        <span class="script-tag">State Machine</span>
+        <span class="script-tag">5-Phase Flow</span>
+        <span class="script-tag">3D + UI Steps</span>
+      </div>
+    </div>
+
+    <div class="script-card reveal">
+      <div class="script-card-header">
+        <div class="script-dot dot-amber"></div>
+        <span class="script-name">UniversalPulse.cs</span>
+      </div>
+      <div class="script-desc">Universal pulse effect working across mesh renderers, sprite renderers, and UI Images with original color restoration.</div>
+      <div class="script-tags">
+        <span class="script-tag">MeshRenderer</span>
+        <span class="script-tag">UI Image</span>
+        <span class="script-tag">DOTween Yoyo</span>
+      </div>
+    </div>
+
+    <div class="script-card reveal">
+      <div class="script-card-header">
+        <div class="script-dot dot-purple"></div>
+        <span class="script-name">PanelToggleController.cs</span>
+      </div>
+      <div class="script-desc">Sidebar expand/collapse with camera rig movement, model repositioning, additional element sliding, and layout group management.</div>
+      <div class="script-tags">
+        <span class="script-tag">Camera Anim</span>
+        <span class="script-tag">DOTween Seq</span>
+        <span class="script-tag">Layout Groups</span>
+      </div>
+    </div>
+
+    <div class="script-card reveal">
+      <div class="script-card-header">
+        <div class="script-dot dot-cyan"></div>
+        <span class="script-name">LabelsToggle.cs</span>
+      </div>
+      <div class="script-desc">Context-aware label visibility — shows different label sets based on animator state, with staggered scale+fade animations.</div>
+      <div class="script-tags">
+        <span class="script-tag">Animator State</span>
+        <span class="script-tag">Stagger Anim</span>
+        <span class="script-tag">Multi-setup</span>
+      </div>
+    </div>
+
+    <div class="script-card reveal">
+      <div class="script-card-header">
+        <div class="script-dot dot-blue"></div>
+        <span class="script-name">ClickManager.cs</span>
+      </div>
+      <div class="script-desc">Global raycast-based click manager that resolves priority conflicts when multiple clickable parts overlap in screen space.</div>
+      <div class="script-tags">
+        <span class="script-tag">RaycastAll</span>
+        <span class="script-tag">Priority Sort</span>
+        <span class="script-tag">Hover Mgmt</span>
+      </div>
+    </div>
+
+    <div class="script-card reveal">
+      <div class="script-card-header">
+        <div class="script-dot dot-green"></div>
+        <span class="script-name">PenController.cs</span>
+      </div>
+      <div class="script-desc">Step-by-step pen assembly workflow with cartridge insertion, needle attachment, and priority-ordered animation sequences.</div>
+      <div class="script-tags">
+        <span class="script-tag">Workflow</span>
+        <span class="script-tag">Animator Ctrl</span>
+        <span class="script-tag">Cooldown</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:48px;" class="reveal">
+    <p style="font-size:13px;color:var(--nn-gray);font-family:var(--font-mono);">
+      + FileSizeLogger.cs · ClickablePartAnimation.cs · LabelsPanelController.cs · LabelsToggleController.cs · PenAnimationToggle.cs & <strong>Many More...</strong>
+    </p>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-brand-name">3D Interactive Pen</div>
+      <div class="footer-brand-desc">A Unity-based immersive training experience developed & combining 3D product exploration with guided HCP workflows and patient education tools.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--nn-gray);">Built With</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span style="padding:4px 12px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:100px;font-family:var(--font-mono);font-size:11px;color:var(--nn-gray);">Unity</span>
+        <span style="padding:4px 12px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:100px;font-family:var(--font-mono);font-size:11px;color:var(--nn-gray);">C#</span>
+        <span style="padding:4px 12px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:100px;font-family:var(--font-mono);font-size:11px;color:var(--nn-gray);">Blender</span>
+        <span style="padding:4px 12px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:100px;font-family:var(--font-mono);font-size:11px;color:var(--nn-gray);">Substance</span>
+        <span style="padding:4px 12px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:100px;font-family:var(--font-mono);font-size:11px;color:var(--nn-gray);">DOTween</span>
+        <span style="padding:4px 12px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:100px;font-family:var(--font-mono);font-size:11px;color:var(--nn-gray);">&</span>
+        <span style="padding:4px 12px;background:var(--nn-card);border:0.5px solid var(--nn-border);border-radius:100px;font-family:var(--font-mono);font-size:11px;color:var(--nn-gray);">Sai Deepak</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--nn-gray);">Navigate</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="#demo" style="font-size:13px;color:var(--nn-gray);text-decoration:none;cursor:none;transition:color 0.2s;" onmouseover="this.style.color='var(--nn-cyan)'" onmouseout="this.style.color='var(--nn-gray)'">Demo Video</a>
+        <a href="#features" style="font-size:13px;color:var(--nn-gray);text-decoration:none;cursor:none;transition:color 0.2s;" onmouseover="this.style.color='var(--nn-cyan)'" onmouseout="this.style.color='var(--nn-gray)'">Features</a>
+        <a href="#product" style="font-size:13px;color:var(--nn-gray);text-decoration:none;cursor:none;transition:color 0.2s;" onmouseover="this.style.color='var(--nn-cyan)'" onmouseout="this.style.color='var(--nn-gray)'">Product Info</a>
+        <a href="#hcp" style="font-size:13px;color:var(--nn-gray);text-decoration:none;cursor:none;transition:color 0.2s;" onmouseover="this.style.color='var(--nn-cyan)'" onmouseout="this.style.color='var(--nn-gray)'">HCP Guide</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-disclaimer">
+    <strong>References:</strong> Pen handling study (DV3423–UT296-2023). This presentation is for demonstration and training purposes. All product claims backed by cited clinical evidence.
+  </div>
+</footer>
+
+<script>
+// ===== STARS CANVAS =====
+(function() {
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 180; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.2,
+        a: Math.random(),
+        speed: Math.random() * 0.3 + 0.05,
+        drift: (Math.random() - 0.5) * 0.2
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(160, 200, 255, ${s.a})`;
+      ctx.fill();
+
+      s.a += Math.sin(Date.now() * 0.001 * s.speed) * 0.004;
+      s.a = Math.max(0.05, Math.min(0.9, s.a));
+      s.x += s.drift;
+      if (s.x > canvas.width + 5) s.x = -5;
+      if (s.x < -5) s.x = canvas.width + 5;
+    });
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  initStars();
+  draw();
+  window.addEventListener('resize', () => { resize(); initStars(); });
+})();
+
+// ===== CUSTOM CURSOR =====
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 4 + 'px';
+  cursor.style.top = my - 4 + 'px';
+});
+
+function animRing() {
+  rx += (mx - rx - 18) * 0.12;
+  ry += (my - ry - 18) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+document.querySelectorAll('a, button, .qa-item, .feature-card, .tech-card, .pen-card, .script-card, .stat-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.width = '52px';
+    ring.style.height = '52px';
+    ring.style.opacity = '0.6';
+    cursor.style.transform = 'scale(2)';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.width = '36px';
+    ring.style.height = '36px';
+    ring.style.opacity = '1';
+    cursor.style.transform = 'scale(1)';
+  });
+});
+
+// ===== SCROLL REVEAL =====
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+reveals.forEach(el => observer.observe(el));
+
+// ===== QA ACCORDION =====
+function toggleQA(el) {
+  const allOpen = document.querySelectorAll('.qa-item.open');
+  allOpen.forEach(item => { if (item !== el) item.classList.remove('open'); });
+  el.classList.toggle('open');
+}
+
+// ===== YOUTUBE VIDEO LOADER =====
+function extractYouTubeID(url) {
+  const patterns = [
+    /(?:v=|v\/|vi\/|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function loadVideo() {
+  const url = document.getElementById('ytUrlInput').value.trim();
+  if (!url) return;
+  const id = extractYouTubeID(url);
+  if (!id) { alert('Could not parse YouTube URL. Try: https://www.youtube.com/watch?v=VIDEOID'); return; }
+  const embed = document.getElementById('ytEmbed');
+  const placeholder = document.getElementById('videoPlaceholder');
+  embed.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+  embed.style.display = 'block';
+  placeholder.style.display = 'none';
+}
+
+function triggerVideoLoad() {
+  const url = document.getElementById('ytUrlInput').value.trim();
+  if (url) loadVideo();
+}
+
+// Allow Enter key to trigger load
+document.getElementById('ytUrlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loadVideo();
+});
+
+// ===== ACTIVE NAV LINK =====
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 200) current = s.getAttribute('id');
+  });
+  navLinks.forEach(a => {
+    a.style.color = a.getAttribute('href') === '#' + current ? 'var(--nn-cyan)' : '';
+  });
+});
+</script>
+</body>
+</html>
